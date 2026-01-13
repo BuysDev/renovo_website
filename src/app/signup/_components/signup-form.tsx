@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
 import { authClient, useSession } from "@/lib/auth-client"
-import { hash } from "bcrypt"
+import { encrypt } from '@/lib/security/encrypt'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -58,7 +58,9 @@ export function SignUpForm() {
         },
     })
 
-    async function onSubmit(data: z.infer<typeof formSchema>) {        
+    async function onSubmit(data: z.infer<typeof formSchema>) {
+        const telephone_new = encrypt(process.env.PUBLIC_KEY!, data.telefone)    
+        const cpf_new = encrypt(process.env.SECRET_KEY!, data.cpf)    
         await authClient.signUp.email({
             email: data.email,
             name: data.name,
@@ -78,9 +80,9 @@ export function SignUpForm() {
             },
             data: {
                 cpf: data.cpf,
-                cpfShowable: data.cpf,
+                cpfShowable: cpf_new,
                 telefone: data.telefone,
-                telefoneShowable: data.telefone
+                telefoneShowable: telephone_new
             }
         })
 
