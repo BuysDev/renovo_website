@@ -32,8 +32,8 @@ const formSchema = z
         name: z.string("Digite um nome de usuário válido.").min(3, "O nome de usuário precisa ter no mínimo 3 caracteres").max(32, "O nome de usuário não pode ultrapassar 32 caracteres."),
         password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres."),
         confirmPassword: z.string(),
-        cpf: z.string("Digite um CPF válido.").max(11, "O CPF não pode ultrapassar 11 caracteres."),
-        telefone: z.string("Digite um número de telefone válido").max(11, "O número de telefone não pode ultrapassar 11 caracteres.")
+        cpf: z.string("Digite um CPF válido.").min(11, "O CPF precisa ter 11 caracteres.").max(11, "O CPF não pode ultrapassar 11 caracteres."),
+        telefone: z.string("Digite um número de telefone válido").min(11, "O número de telefone precisa ter 11 caracteres.").max(11, "O número de telefone não pode ultrapassar 11 caracteres.")
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "As senhas não conferem.",
@@ -67,15 +67,14 @@ export function SignUpForm() {
             password: data.password
         })
 
-        const new_cpf = encrypt(process.env.PUBLIC_KEY!, data.cpf)
-        const new_phone_number = encrypt(process.env.PUBLIC_KEY!, data.telefone)
-
-        axios.post("http://localhost:3000/api/update/user/:id", {
-            cpf: new_cpf,
-            telefone: new_phone_number
-        })
-
         push("/painel")
+
+        axios.post(`http://localhost:3000/api/update/user/${authClient.useSession().data?.user.id}`,
+            {
+                cpf: data.cpf,
+                phone: data.telefone
+            }
+        )
 
         toast.success("Cadastro realizado com sucesso!")
     }
